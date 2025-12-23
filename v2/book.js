@@ -9,17 +9,24 @@ const defaultMessageData = [
 // Lấy dữ liệu bức thư từ API (trung thu / noel) nếu có
 function getMessageDataFromApi() {
   try {
-    if (window.apiData && window.apiData.hasOwnProperty('letterContent')) {
-      if (typeof window.apiData.letterContent === 'string') {
-        const raw = window.apiData.letterContent.trim();
-        // Nếu rỗng, trả về mảng rỗng để không hiển thị book
-        if (raw === '') {
-          return [];
-        }
+    if (window.apiData && window.apiData.hasOwnProperty("letterContent")) {
+      if (typeof window.apiData.letterContent === "string") {
+        // const raw = window.apiData.letterContent.trim();
+        // // Nếu rỗng, trả về mảng rỗng để không hiển thị book
+        // if (raw === '') {
+        //   return [];
+        // }
+        raw = `Merry Christmas\n
+        Nay là 25/12 là ngày Lễ Noel\n
+        Mong rằng những ánh sáng lung linh của Noel sẽ mang đến cho em sự bình an, hạnh phúc và thật nhiều may mắn.\n
+        Chúc mọi điều tốt đẹp nhất sẽ đến với em trong mùa lễ này và suốt cả năm mới!\n
+        Giáng Sinh vui vẻ nhé ạ!\n
+        Anh yêu Em nhiều lắm!
+`;
         const lines = raw
           .split(/\r?\n/)
-          .map(line => line.trim())
-          .filter(line => line.length > 0);
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0);
         if (lines.length > 0) {
           return lines;
         }
@@ -28,7 +35,7 @@ function getMessageDataFromApi() {
       }
     }
   } catch (e) {
-    console.warn('Không đọc được letterContent từ apiData, dùng default:', e);
+    console.warn("Không đọc được letterContent từ apiData, dùng default:", e);
   }
   // Chỉ dùng dữ liệu mặc định nếu không có apiData hoặc không có trường letterContent
   return defaultMessageData;
@@ -39,35 +46,47 @@ var typingState = {
   currentLine: 0,
   pElements: [],
   timelines: [],
-  isPaused: false
+  isPaused: false,
 };
 
 // Hàm split text thành từng từ (đẹp hơn cho bức thư)
 function splitTextIntoWords(text) {
-  return text.split(/(\s+)/).map(function(word, index) {
-    if (/^\s+$/.test(word)) {
-      return '<span class="word-space">' + word + '</span>';
-    }
-    return '<span class="word">' + word + '</span>';
-  }).join('');
+  return text
+    .split(/(\s+)/)
+    .map(function (word, index) {
+      if (/^\s+$/.test(word)) {
+        return '<span class="word-space">' + word + "</span>";
+      }
+      return '<span class="word">' + word + "</span>";
+    })
+    .join("");
 }
 
 // Hàm split text thành từng từ, mỗi từ chứa các ký tự (tránh ngắt ký tự khi xuống dòng)
 function splitTextIntoChars(text) {
   // Split thành từng từ (bao gồm khoảng trắng)
   var words = text.split(/(\s+)/);
-  
-  return words.map(function(word) {
-    if (/^\s+$/.test(word)) {
-      // Nếu là khoảng trắng, giữ nguyên
-      return '<span class="word-wrapper"><span class="char-space">' + word + '</span></span>';
-    }
-    // Nếu là từ, wrap trong word-wrapper và split thành ký tự
-    var chars = word.split('').map(function(char) {
-      return '<span class="char">' + char + '</span>';
-    }).join('');
-    return '<span class="word-wrapper">' + chars + '</span>';
-  }).join('');
+
+  return words
+    .map(function (word) {
+      if (/^\s+$/.test(word)) {
+        // Nếu là khoảng trắng, giữ nguyên
+        return (
+          '<span class="word-wrapper"><span class="char-space">' +
+          word +
+          "</span></span>"
+        );
+      }
+      // Nếu là từ, wrap trong word-wrapper và split thành ký tự
+      var chars = word
+        .split("")
+        .map(function (char) {
+          return '<span class="char">' + char + "</span>";
+        })
+        .join("");
+      return '<span class="word-wrapper">' + chars + "</span>";
+    })
+    .join("");
 }
 
 // Hàm scroll đến element
@@ -86,7 +105,7 @@ function scrollToElement(element) {
   ) {
     details.scrollTo({
       top: elementTop - 20,
-      behavior: "smooth"
+      behavior: "smooth",
     });
   }
 }
@@ -95,26 +114,34 @@ function scrollToElement(element) {
 function typeTextWithGSAP(element, text, lineIndex, callback) {
   // Kiểm tra xem đã có timeline và nội dung chưa
   var existingTimeline = typingState.timelines[lineIndex];
-  var existingChars = element.querySelectorAll('.char');
-  
+  var existingChars = element.querySelectorAll(".char");
+
   // Nếu đã có timeline và đang paused, chỉ cần resume
-  if (existingTimeline && existingTimeline.paused() && existingChars.length > 0) {
+  if (
+    existingTimeline &&
+    existingTimeline.paused() &&
+    existingChars.length > 0
+  ) {
     if (!typingState.isPaused) {
       existingTimeline.play();
     }
     return;
   }
-  
+
   // Nếu timeline đã completed, không làm gì
-  if (existingTimeline && !existingTimeline.paused() && existingTimeline.progress() === 1) {
+  if (
+    existingTimeline &&
+    !existingTimeline.paused() &&
+    existingTimeline.progress() === 1
+  ) {
     if (callback) callback();
     return;
   }
 
   // Clear element và split text thành từng ký tự
   element.innerHTML = splitTextIntoChars(text);
-  var chars = element.querySelectorAll('.char');
-  
+  var chars = element.querySelectorAll(".char");
+
   if (chars.length === 0) {
     if (callback) callback();
     return;
@@ -122,16 +149,16 @@ function typeTextWithGSAP(element, text, lineIndex, callback) {
 
   // Set initial state cho tất cả chars - ẩn hoàn toàn
   gsap.set(chars, {
-    opacity: 0
+    opacity: 0,
   });
 
   // Tạo timeline cho dòng này
   var tl = gsap.timeline({
-    onComplete: function() {
+    onComplete: function () {
       scrollToElement(element);
       if (callback) callback();
     },
-    paused: typingState.isPaused
+    paused: typingState.isPaused,
   });
 
   // Typewriter effect: từng ký tự xuất hiện một cách tuần tự
@@ -141,19 +168,19 @@ function typeTextWithGSAP(element, text, lineIndex, callback) {
     ease: "none", // Không có easing để giống máy đánh chữ
     stagger: {
       each: 0.08, // Mỗi ký tự cách nhau 0.08s (chậm hơn)
-      from: "start"
+      from: "start",
     },
-    onUpdate: function() {
+    onUpdate: function () {
       // Auto scroll khi typing
       if (this.progress() > 0.2 && this.progress() % 0.1 < 0.05) {
         scrollToElement(element);
       }
-    }
+    },
   });
 
   // Lưu timeline để có thể pause/resume
   typingState.timelines[lineIndex] = tl;
-  
+
   // Play timeline
   if (!typingState.isPaused) {
     tl.play();
@@ -167,10 +194,10 @@ function startTypingEffect() {
 
   // Lấy dữ liệu bức thư (ưu tiên từ API)
   const messageData = getMessageDataFromApi();
-  
+
   // Nếu messageData rỗng (letterContent rỗng), không hiển thị book
   if (messageData.length === 0) {
-    console.log('letterContent rỗng, không hiển thị book');
+    console.log("letterContent rỗng, không hiển thị book");
     var guideInfo = document.getElementById("guideInfo");
     if (guideInfo) {
       guideInfo.classList.remove("show");
@@ -192,25 +219,20 @@ function startTypingEffect() {
 
   function typeNextLine() {
     if (typingState.isPaused) return;
-    
+
     if (typingState.currentLine < typingState.pElements.length) {
       var currentLine = typingState.currentLine;
       var element = typingState.pElements[currentLine];
       var text = messageData[currentLine];
-      
+
       scrollToElement(element);
-      
-      typeTextWithGSAP(
-        element,
-        text,
-        currentLine,
-        function () {
-          typingState.currentLine++;
-          if (!typingState.isPaused) {
-            setTimeout(typeNextLine, 300);
-          }
+
+      typeTextWithGSAP(element, text, currentLine, function () {
+        typingState.currentLine++;
+        if (!typingState.isPaused) {
+          setTimeout(typeNextLine, 300);
         }
-      );
+      });
     }
   }
 
@@ -221,7 +243,7 @@ function startTypingEffect() {
 function pauseTyping() {
   typingState.isPaused = true;
   // Pause tất cả timelines
-  typingState.timelines.forEach(function(tl) {
+  typingState.timelines.forEach(function (tl) {
     if (tl) tl.pause();
   });
 }
@@ -230,45 +252,43 @@ function pauseTyping() {
 function resumeTyping() {
   typingState.isPaused = false;
   // Resume tất cả timelines đang paused
-  typingState.timelines.forEach(function(tl) {
+  typingState.timelines.forEach(function (tl) {
     if (tl && tl.paused() && tl.progress() < 1) {
       tl.play();
     }
   });
-  
+
   // Nếu có dòng chưa bắt đầu, tiếp tục typing
   if (typingState.currentLine < typingState.pElements.length) {
     var currentLine = typingState.currentLine;
     var element = typingState.pElements[currentLine];
     var text = messageData[currentLine];
-    
+
     // Kiểm tra xem dòng này đã có timeline chưa
-    if (!typingState.timelines[currentLine] || typingState.timelines[currentLine].progress() === 1) {
+    if (
+      !typingState.timelines[currentLine] ||
+      typingState.timelines[currentLine].progress() === 1
+    ) {
       // Nếu chưa có hoặc đã hoàn thành, tiếp tục dòng tiếp theo
       function typeNextLine() {
         if (typingState.isPaused) return;
-        
+
         if (typingState.currentLine < typingState.pElements.length) {
           var currentLine = typingState.currentLine;
           var element = typingState.pElements[currentLine];
           var text = messageData[currentLine];
-          
+
           scrollToElement(element);
-          
-          typeTextWithGSAP(
-            element,
-            text,
-            currentLine,
-            function () {
-              typingState.currentLine++;
-              if (!typingState.isPaused) {
-                setTimeout(typeNextLine, 300);
-              }
+
+          typeTextWithGSAP(element, text, currentLine, function () {
+            typingState.currentLine++;
+            if (!typingState.isPaused) {
+              setTimeout(typeNextLine, 300);
             }
-          );
+          });
         }
       }
-      
+
       typeNextLine();
     }
   }
@@ -299,11 +319,11 @@ document.addEventListener("DOMContentLoaded", function () {
         mutation.attributeName === "class"
       ) {
         var hasHidden = guideInfo.classList.contains("hidden");
-        
+
         if (hasHidden) {
           // Reset when book is fully closed
           // Kill all timelines
-          typingState.timelines.forEach(function(tl) {
+          typingState.timelines.forEach(function (tl) {
             if (tl) tl.kill();
           });
           typingState.currentLine = 0;
@@ -325,12 +345,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   observer.observe(guideInfo, {
     attributes: true,
-    attributeFilter: ["class"]
+    attributeFilter: ["class"],
   });
 
   // Hover to open book and continue typing
   card.addEventListener("mouseenter", function () {
-    if (guideInfo.classList.contains("show") && !guideInfo.classList.contains("hidden")) {
+    if (
+      guideInfo.classList.contains("show") &&
+      !guideInfo.classList.contains("hidden")
+    ) {
       card.classList.add("book-opened");
       if (typingState.timelines.length === 0 || typingState.currentLine === 0) {
         startTypingEffect();
@@ -342,7 +365,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Leave hover to close book and pause typing
   card.addEventListener("mouseleave", function () {
-    if (guideInfo.classList.contains("show") && !guideInfo.classList.contains("hidden")) {
+    if (
+      guideInfo.classList.contains("show") &&
+      !guideInfo.classList.contains("hidden")
+    ) {
       card.classList.remove("book-opened");
       pauseTyping();
     }
