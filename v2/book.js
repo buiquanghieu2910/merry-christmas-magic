@@ -19,6 +19,8 @@ function getMessageDataFromApi() {
         raw = `Merry Christmas\n
         Nay là 25/12 là ngày Lễ Noel\n
         Mong rằng những ánh sáng lung linh của Noel sẽ mang đến cho em sự bình an, hạnh phúc và thật nhiều may mắn.\n
+        Khi ở độ tuổi đẹp nhất, hãy yêu thương bản thân mình thật tốt, hãy sống với vẻ đẹp riêng của mình và nở rộ như một bông hoa.\n
+        Yêu bản thân, làm như thần của riêng mình em nhé.\n
         Chúc mọi điều tốt đẹp nhất sẽ đến với em trong mùa lễ này và suốt cả năm mới!\n
         Giáng Sinh vui vẻ nhé ạ!\n
         Anh yêu Em nhiều lắm!
